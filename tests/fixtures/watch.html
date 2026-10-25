@@ -1,0 +1,72 @@
+<!doctype html>
+<!-- Watch page stand-in with a mock of the player API that lives on
+     #movie_player in YouTube's MAIN world. Calls are recorded on window.__calls. -->
+<html><head><style>ytd-watch-metadata { display:block; width:1000px; } #top-row { display:flex; justify-content:space-between; } #actions { display:flex; gap:8px; }</style></head><body>
+<ytd-watch-flexy>
+  <div id="movie_player">
+    <video class="html5-main-video"></video>
+    <button class="ytp-button"><div class="ytp-autonav-toggle-button" aria-checked="true"></div></button>
+    <button class="ytp-size-button"></button>
+  </div>
+  <ytd-watch-metadata>
+    <h1 id="title">Half-Life Oddities: Questionable Ethics</h1>
+    <div id="super-title">#tag #tag2</div>
+    <div id="top-row">
+      <div id="owner"><ytd-video-owner-renderer><a href="/@speedchan">Speed Channel</a>
+        <div id="notification-preference-button"><yt-button-view-model><button id="bell-modern" aria-label="Current setting: Personalized. Change notification settings">🔔</button></yt-button-view-model></div>
+      </ytd-video-owner-renderer>
+      <yt-subscription-notification-toggle-button-renderer><button id="bell">Notifications</button></yt-subscription-notification-toggle-button-renderer></div>
+      <div id="actions">
+        <segmented-like-dislike-button-view-model id="reactions"><button>Like</button><button>Dislike</button></segmented-like-dislike-button-view-model>
+        <yt-button-view-model id="share-button"><button id="share-native" aria-label="Share"><yt-icon icon-type="SHARE">↗</yt-icon><span class="ytSpecButtonShapeNextButtonTextContent">Share</span></button></yt-button-view-model>
+        <yt-button-view-model id="save-button"><button id="save-native" aria-label="Save">Save</button></yt-button-view-model>
+        <ytd-menu-renderer><yt-button-shape id="button-shape"><button id="more-native" aria-label="More actions">•••</button></yt-button-shape></ytd-menu-renderer>
+      </div>
+    </div>
+    <div id="description">Video description</div>
+    <dislike-button-view-model><button>Dislike</button></dislike-button-view-model>
+  </ytd-watch-metadata>
+  <ytd-comments id="comments">comments</ytd-comments>
+  <div id="secondary"><div id="related"><div id="items">
+    <ytd-compact-video-renderer id="related-1">Video 1</ytd-compact-video-renderer>
+    <ytd-compact-video-renderer id="related-2">Video 2</ytd-compact-video-renderer>
+    <ytd-compact-video-renderer id="related-3">Video 3</ytd-compact-video-renderer>
+    <ytd-compact-video-renderer id="related-4">Video 4</ytd-compact-video-renderer>
+    <ytd-compact-video-renderer id="related-5">Video 5</ytd-compact-video-renderer>
+    <ytd-continuation-item-renderer id="related-spinner">Loading...</ytd-continuation-item-renderer>
+  </div></div></div>
+</ytd-watch-flexy>
+<script>
+  window.__calls = [];
+  window.__rates = [];
+  const p = document.getElementById('movie_player');
+  const video = p.querySelector('video');
+  // setPlaybackRate mock drives the real <video> so ratechange fires like YouTube's
+  p.setPlaybackRate = (r) => { __rates.push(r); video.playbackRate = r; };
+
+  // 10s of silent 8-bit PCM WAV, generated in-page. A real media source makes
+  // currentTime/playbackRate/timeupdate behave for real (SponsorBlock, speed).
+  const wav = (seconds) => {
+    const rate = 8000, n = rate * seconds, v = new DataView(new ArrayBuffer(44 + n));
+    const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVE'); str(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true);
+    v.setUint16(34, 8, true); str(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    return URL.createObjectURL(new Blob([v.buffer], { type: 'audio/wav' }));
+  };
+  video.src = wav(10);
+  p.getAvailableQualityLevels = () => ['hd1080', 'hd720', 'large', 'auto'];
+  p.getVideoData = () => ({ video_id: 'AAAAAAAAAAA' });
+  p.setPlaybackQualityRange = (a) => __calls.push(a);
+  document.querySelector('.ytp-button').onclick = function () {
+    const t = this.firstElementChild;
+    t.setAttribute('aria-checked', String(t.getAttribute('aria-checked') !== 'true'));
+  };
+  window.__shareOpened = false;
+  document.querySelector('#share-native').onclick = () => { window.__shareOpened = true; };
+  document.querySelector('.ytp-size-button').onclick = () =>
+    document.querySelector('ytd-watch-flexy').toggleAttribute('theater');
+</script>
+</body></html>

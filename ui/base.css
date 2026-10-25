@@ -1,0 +1,201 @@
+/* Shared tokens + controls for popup and options. Dark-only: this is a
+   YouTube tool and YouTube users overwhelmingly run it dark. */
+:root {
+  --bg: #0f0f10;
+  --surface: #18181b;
+  --border: #27272a;
+  --text: #ececee;
+  --muted: #8b8b93;
+  --accent: #ff3b3b;
+  --button-accent: #c82020;
+  --ok: #4ade80;
+  --switch-off: #3f3f46;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.35 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.title { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.title span { color: var(--accent); }
+
+.group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 0;
+  margin-bottom: 10px;
+}
+.group__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* <details> styling: custom chevron instead of the default marker */
+summary.group__title { cursor: pointer; list-style: none; user-select: none; }
+summary.group__title::-webkit-details-marker { display: none; }
+summary.group__title::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+details[open] > summary.group__title::before { transform: rotate(45deg); }
+.group__count { margin-left: auto; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.toggle:hover { background: rgb(255 255 255 / 0.03); }
+.toggle[data-disabled] { opacity: 0.45; cursor: default; }
+.toggle__text { display: flex; flex-direction: column; min-width: 0; }
+.toggle__hint { color: var(--muted); font-size: 11px; }
+
+.badge {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgb(74 222 128 / 0.15);
+  color: var(--ok);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.badge--zero { background: rgb(255 255 255 / 0.06); color: var(--muted); }
+.badge--error { background: rgb(255 59 59 / 0.2); color: var(--accent); }
+
+/* Native checkbox restyled as a switch: keeps keyboard + a11y for free,
+   no div-soup with onClick handlers and hand-rolled aria. */
+.switch {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 32px;
+  height: 18px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--switch-off);
+  cursor: inherit;
+  transition: background 0.15s;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.switch:checked { background: var(--accent); }
+.switch:checked::after { transform: translateX(14px); }
+.switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.switch--master { cursor: pointer; }
+
+.select {
+  flex: none;
+  background: var(--switch-off);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font: inherit;
+  cursor: pointer;
+}
+.select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link:hover { color: var(--text); }
+
+.btn {
+  background: var(--switch-off);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn--primary { background: var(--button-accent); border-color: var(--button-accent); color: #fff; }
+.btn--primary:disabled { opacity: 0.4; cursor: default; }
+.btn--danger:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── v2 controls ── */
+.number { display: flex; align-items: center; gap: 4px; flex: none; }
+.number__input {
+  width: 64px;
+  background: var(--switch-off);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font: inherit;
+  text-align: right;
+}
+.number__input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.number__unit { color: var(--muted); font-size: 11px; min-width: 30px; }
+
+.presets { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 4px 12px; }
+.chip {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--muted); }
+.chip--active { background: rgb(255 59 59 / 0.15); border-color: var(--accent); color: var(--accent); }
+.chip--add { color: var(--muted); border-style: dashed; }
+.chip--input { width: 120px; cursor: text; outline: none; border-color: var(--muted); }
+
+.group__actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 12px 8px; }
+.btn--small { padding: 3px 10px; font-size: 12px; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.muted { color: var(--muted); }
+.small { font-size: 11px; }
+.warn { color: var(--accent); }
+.ok { color: var(--ok); }
+
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }

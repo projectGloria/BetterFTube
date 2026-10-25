@@ -1,0 +1,29 @@
+body { width: 340px; }
+
+.popup { padding: 12px; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 12px;
+}
+
+.diag-note {
+  margin: 0 4px 10px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.footer__links { display: flex; gap: 12px; }
+
+.toolbar { display: grid; gap: 8px; margin-bottom: 12px; }
+.toolbar input[type="text"], .toolbar > input { width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px; }

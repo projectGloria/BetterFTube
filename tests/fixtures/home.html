@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- Minimal stand-in for YouTube's home/search DOM. Tag names and attributes
+     mirror the real renderers; content is fake. -->
+<html><head>
+<script>
+  // Runs right after document_start content scripts: proves the localStorage
+  // mirror applied our attrs synchronously, before any async storage read.
+  window.__earlyAttrs = document.documentElement.getAttributeNames();
+</script>
+</head><body>
+<a id="logo" href="/">logo</a>
+<a id="subs-link" href="/feed/subscriptions">Subscriptions</a>
+<ytd-guide-entry-renderer id="guide-shorts"><a title="Shorts" href="/shorts/">Shorts</a></ytd-guide-entry-renderer>
+<ytd-feed-filter-chip-bar-renderer id="chips">All · Music · Gaming</ytd-feed-filter-chip-bar-renderer>
+<ytd-rich-section-renderer id="shorts-shelf"><ytd-rich-shelf-renderer is-shorts>Shorts</ytd-rich-shelf-renderer></ytd-rich-section-renderer>
+
+<ytd-rich-item-renderer id="t-normal">
+  <a id="video-title" title="How CPUs work">How CPUs work</a>
+  <ytd-channel-name><yt-formatted-string id="text">Good Channel</yt-formatted-string></ytd-channel-name>
+  <a href="/@goodchannel">avatar</a>
+</ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="t-keyword">
+  <a id="video-title" title="My REACTION to the reaction">My REACTION to the reaction</a>
+  <ytd-channel-name><yt-formatted-string id="text">Other</yt-formatted-string></ytd-channel-name>
+</ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="t-handle">
+  <a id="video-title" title="Totally normal video">Totally normal video</a>
+  <ytd-channel-name><yt-formatted-string id="text">Spam Inc</yt-formatted-string></ytd-channel-name>
+  <a href="/@SpamChannel/videos">avatar</a>
+</ytd-rich-item-renderer>
+<yt-lockup-view-model id="t-lockup">
+  <h3 class="yt-lockup-metadata-view-model__title">Unboxing a new phone</h3>
+  <span class="yt-content-metadata-view-model__metadata-text">Gadget Guy</span>
+</yt-lockup-view-model>
+<ytd-rich-item-renderer id="t-ctx">
+  <a id="video-title" title="Right-click me">Right-click me</a>
+  <ytd-channel-name><yt-formatted-string id="text">Ctx Channel</yt-formatted-string></ytd-channel-name>
+  <a href="/@ctxchannel">avatar</a>
+</ytd-rich-item-renderer>
+
+<ytd-video-renderer id="t-short-overlay"><ytd-thumbnail-overlay-time-status-renderer overlay-style="SHORTS"></ytd-thumbnail-overlay-time-status-renderer></ytd-video-renderer>
+<ytd-rich-item-renderer id="t-live"><ytd-thumbnail-overlay-time-status-renderer overlay-style="LIVE"></ytd-thumbnail-overlay-time-status-renderer></ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="w95"><div id="progress" style="width: 95%;"></div></ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="w9"><div id="progress" style="width: 9%;"></div></ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="w100"><div id="progress" style="width: 100%;"></div></ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="w50"><div id="progress" style="width: 50%;"></div></ytd-rich-item-renderer>
+<a id="shortlink" href="/shorts/CCCCCCCCCCC">a short</a>
+
+<!-- Filter fixtures: duration badge + metadata line like the classic renderer -->
+<ytd-rich-item-renderer id="f-short">
+  <ytd-thumbnail-overlay-time-status-renderer overlay-style="DEFAULT"><div id="text">0:45</div></ytd-thumbnail-overlay-time-status-renderer>
+  <a id="video-title" title="Quick tip">Quick tip</a>
+  <div id="metadata-line"><span>5K views</span><span>1 day ago</span></div>
+</ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="f-few">
+  <ytd-thumbnail-overlay-time-status-renderer overlay-style="DEFAULT"><div id="text">10:00</div></ytd-thumbnail-overlay-time-status-renderer>
+  <a id="video-title" title="Nobody watched this">Nobody watched this</a>
+  <div id="metadata-line"><span>12 views</span><span>1 day ago</span></div>
+</ytd-rich-item-renderer>
+<ytd-rich-item-renderer id="f-old">
+  <ytd-thumbnail-overlay-time-status-renderer overlay-style="DEFAULT"><div id="text">10:00</div></ytd-thumbnail-overlay-time-status-renderer>
+  <a id="video-title" title="Ancient upload">Ancient upload</a>
+  <div id="metadata-line"><span>5K views</span><span>2 years ago</span></div>
+</ytd-rich-item-renderer>
+<!-- New lockup layout, passes every filter -->
+<yt-lockup-view-model id="f-ok">
+  <yt-thumbnail-badge-view-model><span class="yt-badge-shape__text">10:00</span></yt-thumbnail-badge-view-model>
+  <h3 class="yt-lockup-metadata-view-model__title">Normal video</h3>
+  <span class="yt-content-metadata-view-model__metadata-text">Fine Channel</span>
+  <span class="yt-content-metadata-view-model__metadata-text">5K views</span>
+  <span class="yt-content-metadata-view-model__metadata-text">1 day ago</span>
+</yt-lockup-view-model>
+
+<!-- Picker target: a component no built-in toggle covers -->
+<ytd-promo-thing id="promo" onclick="window.__promoClicked = true">Buy stuff</ytd-promo-thing>
+
+<script>
+  // Simulate YouTube recycling a tile: same element, new video.
+  window.recycle = () => {
+    const t = document.querySelector('#t-normal #video-title');
+    t.title = t.textContent = 'Live reaction stream';
+  };
+</script>
+</body></html>
