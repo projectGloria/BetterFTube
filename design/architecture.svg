@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 280" width="100%" height="100%">
+  <defs>
+    <linearGradient id="flow-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10131d"/>
+      <stop offset="100%" stop-color="#161a26"/>
+    </linearGradient>
+    <linearGradient id="card-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a2236"/>
+      <stop offset="100%" stop-color="#131929"/>
+    </linearGradient>
+    <linearGradient id="card-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#33171f"/>
+      <stop offset="100%" stop-color="#241117"/>
+    </linearGradient>
+    <linearGradient id="card-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142b20"/>
+      <stop offset="100%" stop-color="#0f1d16"/>
+    </linearGradient>
+    <linearGradient id="card-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#261b36"/>
+      <stop offset="100%" stop-color="#1b1327"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    .sans { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+
+  <!-- Canvas -->
+  <rect width="920" height="280" rx="14" fill="url(#flow-bg)" stroke="#262c3e" stroke-width="1.5"/>
+
+  <!-- Step 1: document_start -->
+  <g transform="translate(30, 45)">
+    <rect width="180" height="190" rx="10" fill="url(#card-blue)" stroke="#3b82f6" stroke-width="1.2"/>
+    <rect x="12" y="14" width="28" height="28" rx="6" fill="#3b82f6" opacity="0.2"/>
+    <text x="26" y="33" fill="#60a5fa" font-size="14" text-anchor="middle" font-weight="700" class="sans">1</text>
+    <text x="50" y="33" fill="#93c5fd" font-size="13" font-weight="700" class="sans">Document Start</text>
+    <text x="14" y="66" fill="#cad5e8" font-size="11" font-weight="600" class="sans">CSS Engine Injected</text>
+    <text x="14" y="86" fill="#8898b5" font-size="10" class="sans">One global stylesheet injected at early navigation.</text>
+    <rect x="12" y="118" width="156" height="54" rx="6" fill="#0d111a" stroke="#232d44" stroke-width="1"/>
+    <text x="20" y="136" fill="#38bdf8" font-size="9.5" class="mono">&lt;html data-bft-*&gt;</text>
+    <text x="20" y="152" fill="#7dd3fc" font-size="9.5" class="mono">Gated Selectors</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M218 140 L248 140" stroke="#4b5563" stroke-width="2" stroke-dasharray="4,4"/>
+  <polygon points="248,136 256,140 248,144" fill="#6b7280"/>
+
+  <!-- Step 2: Instant Gating -->
+  <g transform="translate(262, 45)">
+    <rect width="180" height="190" rx="10" fill="url(#card-green)" stroke="#22c55e" stroke-width="1.2"/>
+    <rect x="12" y="14" width="28" height="28" rx="6" fill="#22c55e" opacity="0.2"/>
+    <text x="26" y="33" fill="#4ade80" font-size="14" text-anchor="middle" font-weight="700" class="sans">2</text>
+    <text x="50" y="33" fill="#86efac" font-size="13" font-weight="700" class="sans">Zero-Lag Gating</text>
+    <text x="14" y="66" fill="#cad5e8" font-size="11" font-weight="600" class="sans">Native Style Engine</text>
+    <text x="14" y="86" fill="#8898b5" font-size="10" class="sans">Toggles flip single HTML attributes. Browser hides elements at 120 FPS.</text>
+    <rect x="12" y="126" width="156" height="46" rx="6" fill="#0c1712" stroke="#1d3d2c" stroke-width="1"/>
+    <text x="20" y="145" fill="#4ade80" font-size="9.5" class="mono">No DOM mutation lag</text>
+    <text x="20" y="160" fill="#a7f3d0" font-size="9" class="sans">Infinite scroll covered</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M450 140 L480 140" stroke="#4b5563" stroke-width="2" stroke-dasharray="4,4"/>
+  <polygon points="480,136 488,140 480,144" fill="#6b7280"/>
+
+  <!-- Step 3: Pure Matchers & Cache -->
+  <g transform="translate(494, 45)">
+    <rect width="180" height="190" rx="10" fill="url(#card-purple)" stroke="#a855f7" stroke-width="1.2"/>
+    <rect x="12" y="14" width="28" height="28" rx="6" fill="#a855f7" opacity="0.2"/>
+    <text x="26" y="33" fill="#c084fc" font-size="14" text-anchor="middle" font-weight="700" class="sans">3</text>
+    <text x="50" y="33" fill="#d8b4fe" font-size="13" font-weight="700" class="sans">Smart Tile Engine</text>
+    <text x="14" y="66" fill="#cad5e8" font-size="11" font-weight="600" class="sans">RE2JS + Tile Signatures</text>
+    <text x="14" y="86" fill="#8898b5" font-size="10" class="sans">Single scanner pass. Handles recycled video tiles &amp; prevents ReDoS.</text>
+    <rect x="12" y="126" width="156" height="46" rx="6" fill="#140d1f" stroke="#372054" stroke-width="1"/>
+    <text x="20" y="145" fill="#c084fc" font-size="9.5" class="mono">data-bft-blocked</text>
+    <text x="20" y="160" fill="#e9d5ff" font-size="9" class="sans">Linear-time matching</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <path d="M682 140 L712 140" stroke="#4b5563" stroke-width="2" stroke-dasharray="4,4"/>
+  <polygon points="712,136 720,140 712,144" fill="#6b7280"/>
+
+  <!-- Step 4: Security & Boundary -->
+  <g transform="translate(726, 45)">
+    <rect width="164" height="190" rx="10" fill="url(#card-red)" stroke="#ff3b3b" stroke-width="1.2"/>
+    <rect x="12" y="14" width="28" height="28" rx="6" fill="#ff3b3b" opacity="0.2"/>
+    <text x="26" y="33" fill="#ff5c5c" font-size="14" text-anchor="middle" font-weight="700" class="sans">4</text>
+    <text x="50" y="33" fill="#fca5a5" font-size="13" font-weight="700" class="sans">Secure Sandbox</text>
+    <text x="14" y="66" fill="#cad5e8" font-size="11" font-weight="600" class="sans">Trust Boundary</text>
+    <text x="14" y="86" fill="#8898b5" font-size="10" class="sans">Background worker validates all messages. Offline by default.</text>
+    <rect x="12" y="126" width="140" height="46" rx="6" fill="#1b0c0f" stroke="#481822" stroke-width="1"/>
+    <text x="20" y="145" fill="#f87171" font-size="9.5" class="mono">Hash Prefix API</text>
+    <text x="20" y="160" fill="#fecaca" font-size="9" class="sans">Zero tracking / telemetry</text>
+  </g>
+</svg>
