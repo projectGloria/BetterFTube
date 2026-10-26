@@ -9,6 +9,10 @@ The automated suite proves the plumbing against fixture pages. This checklist co
 - [ ] No chip bar ("All / Music / …") and no blank strip where it was
 - [ ] No Premium/promo banners at the top
 - [ ] Sidebar: no Explore section, no "More from YouTube", no footer link wall
+- [ ] Navigation → **Hide Subscriptions section** hides its heading, channel rows and Show more; switch it off and they return while Home stays visible
+- [ ] Pick **Report history** → first candidate says **1 match**; Hide removes that row while Home, Help and subscribed channels remain
+- [ ] **You sidebar** → toggle each heading/entry independently; restore each one and check that subscribed channels and page content stay visible
+- [ ] **Hide Show less** leaves Show more available when the personal list is collapsed
 - [ ] Masthead: voice-search mic gone
 - [ ] Toggle **Hide Mixes** on → Mix tiles disappear
 - [ ] Toggle **Hide community posts** on → post cards disappear (if your feed has any)

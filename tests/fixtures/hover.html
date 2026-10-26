@@ -1,0 +1,39 @@
+<!-- Feedback CSS taken from YouTube's desktop base stylesheet on 2026-10-26.
+     The color is supplied by YouTube inline on the feedback shape.
+     This reproduces the separate expanding layer, rather than a background
+     painted directly on the video card. -->
+<style>
+  .ytSpecTouchFeedbackShapeHost{display:inline-block;border-radius:inherit;position:absolute;top:0;right:0;bottom:0;left:0}
+  .ytSpecTouchFeedbackShapeTriggerEvents{pointer-events:none}
+  .ytSpecTouchFeedbackShapeHoverEffect{transition:all .3s cubic-bezier(.05,0,0,1);transition-property:opacity,transform;background-color:var(--tf3fc855af2285f5f);opacity:0;transform:scale(.9);will-change:opacity,transform;border-radius:inherit;position:absolute;top:0;right:0;bottom:0;left:0}
+  .ytSpecTouchFeedbackShapeHovered .ytSpecTouchFeedbackShapeHoverEffect{opacity:1;transform:scale(1)}
+  .ytSpecTouchFeedbackShapeThumbnailSizeLarge{margin:-12px}
+  .ytSpecTouchFeedbackShapeThumbnailSizeLarge .ytSpecTouchFeedbackShapeFill,.ytSpecTouchFeedbackShapeThumbnailSizeLarge .ytSpecTouchFeedbackShapeHoverEffect,.ytSpecTouchFeedbackShapeThumbnailSizeLarge .ytSpecTouchFeedbackShapeStroke{border-radius:16px}
+  .ytCardViewModelFallbackHoverEffect:hover:after{background-color:var(--t416e5931fc464589);content:"";top:0;left:0;right:0;bottom:0;pointer-events:none;position:absolute}
+  .ytCardViewModelHoverEffect:after{background-color:var(--t416e5931fc464589);content:"";top:0;left:0;right:0;bottom:0;pointer-events:none;position:absolute}
+  .ytThumbnailHoverOverlayToggleActionsViewModelHost{display:flex;top:0;right:0;position:absolute;z-index:200;width:100%;height:100%;box-sizing:border-box;padding:0 0 4px 4px;pointer-events:none}
+  .ytThumbnailHoverOverlayToggleActionsViewModelHidden{visibility:hidden}
+  .ytThumbnailHoverOverlayToggleActionsViewModelTopEndVertical{flex-direction:column;justify-content:flex-start;align-items:flex-end}
+  #hover-card { display: block; position: relative; margin: 30px; width: 300px; height: 230px; }
+  #hover-card a { display: block; position: relative; padding: 10px; }
+  #hover-card yt-thumbnail-view-model { display: block; height: 160px; }
+</style>
+<yt-lockup-view-model id="hover-card" class="ytLockupViewModelHost ytLockupViewModelVertical">
+  <yt-touch-feedback-shape class="ytSpecTouchFeedbackShapeHost ytSpecTouchFeedbackShapeTriggerEvents ytSpecTouchFeedbackShapeHovered ytSpecTouchFeedbackShapeThumbnailSizeLarge" style="--tf3fc855af2285f5f: rgb(50, 30, 20)">
+    <div class="ytSpecTouchFeedbackShapeHoverEffect"></div>
+  </yt-touch-feedback-shape>
+  <div class="ytCardViewModelHoverEffect" style="--t416e5931fc464589: rgba(255,255,255,0.1)"></div>
+  <a href="/watch?v=AAAAAAAAAAA">Video title</a>
+  <yt-thumbnail-view-model>
+    <yt-thumbnail-hover-overlay-toggle-actions-view-model class="ytThumbnailHoverOverlayToggleActionsViewModelHost ytThumbnailHoverOverlayToggleActionsViewModelTopEndVertical">
+      <button>Watch later</button><button>Add to queue</button>
+    </yt-thumbnail-hover-overlay-toggle-actions-view-model>
+    <yt-thumbnail-badge-view-model>9:43</yt-thumbnail-badge-view-model>
+  </yt-thumbnail-view-model>
+</yt-lockup-view-model>
+<!-- Some render paths no longer retain a classic tile ancestor. -->
+<yt-thumbnail-view-model id="standalone-thumbnail">
+  <yt-thumbnail-hover-overlay-toggle-actions-view-model><button>Add to queue</button></yt-thumbnail-hover-overlay-toggle-actions-view-model>
+</yt-thumbnail-view-model>
+<!-- Buttons outside video tiles retain their normal feedback. -->
+<button id="unrelated-feedback" style="position: relative"><span class="ytSpecTouchFeedbackShapeHoverEffect">Feedback</span>Other button</button>

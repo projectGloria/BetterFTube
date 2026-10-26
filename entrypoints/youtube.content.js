@@ -135,7 +135,7 @@ export default defineContentScript({
           sendResponse({ ok: true });
           return false;
         case 'bft:diagnose':
-          sendResponse({ ...diagnose(FEATURES, rules), online: onlineStatus() });
+          sendResponse({ ...diagnose(FEATURES, rules, { selectors: msg.selectors !== false }), online: onlineStatus() });
           return false;
         case 'bft:pick':
           startPicker({ onSave: addRule });

@@ -64,7 +64,7 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [onlyActive, setOnlyActive] = useState(false);
   const [advanced, setAdvanced] = useState(false);
-  const diag = useDiagnostics();
+  const diag = useDiagnostics(advanced, settings);
   const granted = usePermissions(ALL_ORIGINS);
   // Lazy initializer: readOpenGroups runs once on mount, not on every render.
   const [openGroups, setOpenGroups] = useState(readOpenGroups);

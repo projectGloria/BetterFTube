@@ -1,0 +1,30 @@
+<style>
+  ytd-guide-section-renderer, ytd-guide-entry-renderer,
+  ytd-guide-collapsible-entry-renderer, ytd-guide-collapsible-section-entry-renderer { display: block; }
+  ytd-guide-collapsible-entry-renderer:not([expanded]) #expanded { display: none; }
+  ytd-guide-collapsible-entry-renderer[expanded] #expander-item { display: none; }
+</style>
+<ytd-guide-section-renderer id="you-section">
+  <div id="guide-section-title"><a href="/feed/you" data-row="heading">You</a></div>
+  <div id="items">
+    <ytd-guide-entry-renderer data-row="channel"><a href="/@mychannel">Your channel</a></ytd-guide-entry-renderer>
+    <ytd-guide-entry-renderer data-row="history"><a href="/feed/history">History</a></ytd-guide-entry-renderer>
+    <ytd-guide-entry-renderer data-row="playlists"><a href="/feed/playlists">Playlists</a></ytd-guide-entry-renderer>
+    <ytd-guide-entry-renderer data-row="watch-later"><a href="/playlist?list=WL">Watch later</a></ytd-guide-entry-renderer>
+    <ytd-guide-entry-renderer data-row="liked-videos"><a href="/playlist?list=LL">Liked videos</a></ytd-guide-entry-renderer>
+    <ytd-guide-collapsible-entry-renderer expanded>
+      <ytd-guide-entry-renderer id="expander-item" data-row="show-more">Show more</ytd-guide-entry-renderer>
+      <div id="expanded">
+        <ytd-guide-entry-renderer data-row="videos"><a href="https://studio.youtube.com/channel/UCexample/videos">Your videos</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer data-row="downloads"><a href="/feed/downloads">Downloads</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer data-row="clips"><a href="/feed/clips">Clips</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer id="collapser-item" data-row="show-less">Show less</ytd-guide-entry-renderer>
+      </div>
+    </ytd-guide-collapsible-entry-renderer>
+  </div>
+</ytd-guide-section-renderer>
+<ytd-guide-section-renderer id="other-section">
+  <ytd-guide-entry-renderer id="other-channel"><a href="/@anotherchannel">Subscribed channel</a></ytd-guide-entry-renderer>
+  <ytd-guide-entry-renderer id="other-playlist"><a href="/playlist?list=LLordinaryPlaylist">Ordinary playlist</a></ytd-guide-entry-renderer>
+</ytd-guide-section-renderer>
+<main><a id="content-history" href="/feed/history">History outside sidebar</a></main>

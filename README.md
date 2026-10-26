@@ -121,11 +121,12 @@ Switch instant presets depending on your current mode:
 
 | Category | Available Toggles &amp; Actions |
 |---|---|
-| **Feed** | Hide Shorts (shelves, search, sidebar, channel tab) • Open Shorts in normal player • Redirect Home → Subscriptions • Hide category chips • Keyword/channel blocklist • Hide watched (≥90%) • Hide Mixes • Hide Live streams • Hide Upcoming • Hide Community posts • Hide Playables • Hide Promos &amp; Banners |
+| **Feed** | Hide Shorts (shelves, search, sidebar, channel tab) • Open Shorts in normal player • Redirect Home → Subscriptions • Hide category chips • Disable video hover effects (card highlight, thumbnail buttons, zoom and preview) • Keyword/channel blocklist • Hide watched (≥90%) • Hide Mixes • Hide Live streams • Hide Upcoming • Hide Community posts • Hide Playables • Hide Promos &amp; Banners |
 | **Filters** | Hide shorter than *N* min • Hide longer than *N* min • Hide fewer than *N* views • Hide older than *N* days • **Allowlist mode** (only show channels you list) |
 | **Watch Page** | Hide Comments • Hide Related videos • Limit right-panel suggestions count • Hide End-screen cards • Hide Info cards &amp; watermark • Hide Merch/products/donations • Hide Hashtags above title • Hide Live chat • Align title &amp; channel • Quick copy `youtu.be` link on Share button • Hide Share button (with `Ctrl+C` fallback) |
 | **Player** | Disable autoplay-next • Theater mode by default • Default playback quality • Hide "Premium-only" 1080p qualities • Default speed • **Remember speed per channel** (e.g., 2× for lectures, 1× for music) |
-| **Navigation** | Hide Explore section • Hide "More from YouTube" • Hide Sidebar footer links • Hide Notifications bell • Hide Create button • Hide Voice search |
+| **You sidebar** | Separate toggles for You heading, Your channel, History, Playlists, Watch later, Liked videos, Your videos, Downloads, Clips and Show less |
+| **Navigation** | Hide Subscriptions section • Hide Explore section • Hide "More from YouTube" • Hide Sidebar footer links • Hide Notifications bell • Hide Create button • Hide Voice search |
 | **Custom** | User-defined CSS editor • Custom element-picker rules (each converted to a toggle) • Live selector diagnostics with element counts |
 | **Online (Opt-in)** | **SponsorBlock** auto-skip (configurable category skips) • **Return YouTube Dislike** ratio &amp; counts |
 

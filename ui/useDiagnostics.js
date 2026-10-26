@@ -8,7 +8,7 @@ import { browser } from 'wxt/browser';
 //
 // Returns null when the active tab isn't YouTube (sendMessage rejects: no
 // receiver), which is the expected case, not an error.
-export function useDiagnostics() {
+export function useDiagnostics(selectors = false, settings = null) {
   const [diag, setDiag] = useState(null);
 
   useEffect(() => {
@@ -22,19 +22,21 @@ export function useDiagnostics() {
         // No "tabs" permission needed: we only use tab.id, not url/title.
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
         if (tab?.id == null) return;
-        const res = await browser.tabs.sendMessage(tab.id, { type: 'bft:diagnose' }, { frameId: 0 });
+        const res = await browser.tabs.sendMessage(tab.id, { type: 'bft:diagnose', selectors }, { frameId: 0 });
         if (alive && res) setDiag(res);
       } catch {
         /* not a YouTube tab, or tab opened before install */
       }
     };
     refresh();
-    const timer = setInterval(refresh, 1500);
+    // Expensive selector counts are opt-in. The normal popup gets one cheap
+    // status refresh per settings change, with no background polling.
+    const timer = selectors ? setInterval(refresh, 3000) : null;
     return () => {
       alive = false;
       clearInterval(timer);
     };
-  }, []);
+  }, [selectors, settings]);
 
   return diag;
 }

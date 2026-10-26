@@ -1,6 +1,6 @@
 {
   "name": "betterftube",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "description": "Declutter YouTube: hide Shorts, chips, comments, promos and more via toggles.",
   "private": true,
   "type": "module",
@@ -13,6 +13,8 @@
     "zip:firefox": "wxt zip -b firefox --mv3",
     "test": "node --test tests/unit.test.js tests/regression.test.js",
     "test:e2e": "node --test --test-concurrency=1 tests/e2e.test.js",
+    "test:hover": "node --test tests/hover.test.js",
+    "test:browser": "node --test tests/browser-regression.test.js tests/hover.test.js",
     "postinstall": "wxt prepare"
   },
   "dependencies": {

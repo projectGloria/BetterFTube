@@ -129,6 +129,38 @@ test('defaults hide Shorts and chips, leave normal content', async () => {
   await page.close();
 });
 
+test('disable hover effects hides new thumbnail actions and card tint, and restores them when off', async () => {
+  const page = await openHome();
+  await page.evaluate(html => document.body.insertAdjacentHTML('afterbegin', html), fixture('hover.html'));
+  const card = page.locator('#hover-card');
+  const actions = card.locator('yt-thumbnail-hover-overlay-toggle-actions-view-model');
+  const feedback = card.locator('.ytSpecTouchFeedbackShapeHoverEffect');
+  try {
+    await card.hover();
+    assert.equal(await actions.isVisible(), true);
+    assert.equal(await feedback.isVisible(), true);
+    await setToggle('Disable video hover effects', true);
+    await page.waitForSelector('html[data-bft-disable-hover-effects]');
+    await card.hover();
+    assert.equal(await actions.isVisible(), false);
+    assert.equal(await feedback.isVisible(), false);
+    assert.equal(await card.locator('a').isVisible(), true);
+    assert.equal(await card.locator('yt-thumbnail-badge-view-model').isVisible(), true);
+    // YouTube changes this class while entering/leaving the thumbnail.
+    await actions.evaluate(el => el.classList.add('ytThumbnailHoverOverlayToggleActionsViewModelHidden'));
+    assert.equal(await actions.isVisible(), false);
+    await actions.evaluate(el => el.classList.remove('ytThumbnailHoverOverlayToggleActionsViewModelHidden'));
+    await setToggle('Disable video hover effects', false);
+    await page.waitForSelector('html:not([data-bft-disable-hover-effects])');
+    await card.hover();
+    assert.equal(await actions.isVisible(), true);
+    assert.equal(await feedback.isVisible(), true);
+  } finally {
+    await patchFeatures({ 'disable-hover-effects': false });
+    await page.close();
+  }
+});
+
 test('diagnostics report per-feature match counts', async () => {
   const page = await openHome();
   const diag = await toContentScript({ type: 'bft:diagnose' });
@@ -136,6 +168,58 @@ test('diagnostics report per-feature match counts', async () => {
   assert.equal(diag.counts['hide-comments'], 0);
   assert.deepEqual(diag.invalid, [], 'every selector parses in Chromium');
   await page.close();
+});
+
+test('sidebar subscriptions can be hidden and restored live without hiding Home', async () => {
+  const page = await openHome();
+  await page.evaluate(html => document.body.insertAdjacentHTML('afterbegin', html), fixture('guide.html'));
+  try {
+    await setToggle('Hide Subscriptions section', true);
+    await page.waitForSelector('html[data-bft-hide-subscriptions]');
+    assert.equal(await page.locator('#subscription-channels').isVisible(), false);
+    assert.equal(await page.locator('#classic-subs-row').isVisible(), false);
+    assert.equal(await page.locator('#home-row').isVisible(), true);
+    assert.equal(await page.locator('#report-row').isVisible(), true);
+    const cheap = await toContentScript({ type: 'bft:diagnose', selectors: false });
+    assert.deepEqual(cheap.counts, {}, 'normal popup requests no selector scans');
+    await setToggle('Hide Subscriptions section', false);
+    await page.waitForSelector('html:not([data-bft-hide-subscriptions])');
+    assert.equal(await page.locator('#subscription-channels').isVisible(), true);
+  } finally {
+    await patchFeatures({ 'hide-subscriptions': false });
+    await page.close();
+  }
+});
+
+test('You sidebar popup exposes independent live toggles for every item', async () => {
+  const page = await openHome();
+  await page.evaluate(html => document.body.insertAdjacentHTML('afterbegin', html), fixture('you-guide.html'));
+  const items = [
+    ['Hide You heading', 'heading', 'hide-you-heading'],
+    ['Hide Your channel', 'channel', 'hide-you-channel'],
+    ['Hide History', 'history', 'hide-you-history'],
+    ['Hide Playlists', 'playlists', 'hide-you-playlists'],
+    ['Hide Watch later', 'watch-later', 'hide-you-watch-later'],
+    ['Hide Liked videos', 'liked-videos', 'hide-you-liked-videos'],
+    ['Hide Your videos', 'videos', 'hide-you-videos'],
+    ['Hide Downloads', 'downloads', 'hide-you-downloads'],
+    ['Hide Clips', 'clips', 'hide-you-clips'],
+    ['Hide Show less', 'show-less', 'hide-you-show-less'],
+  ];
+  try {
+    for (const [label, row, id] of items) {
+      await setToggle(label, true);
+      await page.waitForSelector(`html[data-bft-${id}]`);
+      assert.equal(await page.locator(`[data-row="${row}"]`).isVisible(), false);
+      assert.equal(await page.locator('#other-channel').isVisible(), true);
+      await setToggle(label, false);
+      await page.waitForSelector(`html:not([data-bft-${id}])`);
+      assert.equal(await page.locator(`[data-row="${row}"]`).isVisible(), true);
+    }
+  } finally {
+    await patchFeatures(Object.fromEntries(items.map(([, , id]) => [id, false])));
+    await page.close();
+  }
 });
 
 test('blocklist: options page edits apply live, incl. recycled tiles', async () => {
@@ -441,7 +525,7 @@ test('default speed via player API; per-channel memory only from user input', as
   // Programmatic change with no user input (= YouTube restoring its own rate) → ignored
   await page.evaluate(() => (document.querySelector('video').playbackRate = 3));
   await settle(300);
-  assert.equal(await readStorage('bft:speeds'), undefined);
+  assert.deepEqual((await readStorage('bft:speeds')) ?? {}, {});
 
   // User-initiated: trusted key event, then the rate change → remembered
   await page.keyboard.press('Shift+Period');
@@ -478,7 +562,7 @@ test('network features: refused without permission, work with it', async () => {
     }),
   );
   // Enable directly in storage: the native permission prompt can't be clicked headless
-  await patchFeatures({ sponsorblock: 'sponsor', dislikes: true });
+  await patchFeatures({ sponsorblock: 'sponsor', dislikes: true, 'hide-like-dislike': false });
 
   // 1) No grant → background refuses, nothing fetched, nothing shown
   let page = await ctx.newPage();
@@ -500,7 +584,7 @@ test('network features: refused without permission, work with it', async () => {
   // Seek into the sponsor segment → skipped to its end
   await page.evaluate(() => (document.querySelector('video').currentTime = 2));
   await page.waitForFunction(() => document.querySelector('video').currentTime >= 4, null, { timeout: 5000 });
-  await patchFeatures({ sponsorblock: 'off', dislikes: false });
+  await patchFeatures({ sponsorblock: 'off', dislikes: false, 'hide-like-dislike': true });
   await page.close();
 });
 

@@ -360,3 +360,32 @@ test('revealed tiles override hiding CSS without changing persisted settings', t
   assert.notEqual(ctx.getComputedStyle(tile).display, 'none');
   reveal.remove(); assert.equal(ctx.getComputedStyle(tile).display, 'none');
 });
+
+test('modern camel-case lockup classes supply blocklist and filter fields', t => {
+  const { run } = environment(t, `<yt-lockup-view-model>
+    <h3 class="ytLockupMetadataViewModelTitle">Example video</h3>
+    <span class="ytContentMetadataViewModelMetadataText">Channel name</span>
+    <span class="ytContentMetadataViewModelMetadataText">1.2K views</span>
+    <yt-thumbnail-badge-view-model><span class="ytBadgeShapeBadgeText">12:34</span></yt-thumbnail-badge-view-model>
+    <a href="/@creator">Channel link</a>
+  </yt-lockup-view-model>`);
+  run(source('lib/behaviors.js'));
+  const info = JSON.parse(run('JSON.stringify(readTile(document.querySelector("yt-lockup-view-model")))'));
+  assert.equal(info.title, 'Example video');
+  assert.equal(info.channel, 'Channel name');
+  assert.equal(info.handle, '@creator');
+  assert.equal(info.durationText, '12:34');
+  assert.ok(info.metaTexts.includes('1.2K views'));
+});
+
+test('normal popup diagnostics skip all feature and user-rule selector scans', t => {
+  const { ctx, run } = environment(t, '<div data-bft-blocked></div>');
+  run(source('lib/behaviors.js'));
+  const selectors = [];
+  const query = ctx.document.querySelectorAll.bind(ctx.document);
+  ctx.document.querySelectorAll = selector => { selectors.push(selector); return query(selector); };
+  const result = JSON.parse(run('JSON.stringify(diagnose([{ id: "expensive", hide: ["body:has(div)"] }], [{ id: "custom", selector: "div" }], { selectors: false }))'));
+  assert.deepEqual(result.counts, {});
+  assert.equal(result.hidden.blocklist, 1);
+  assert.deepEqual(selectors, ['[data-bft-blocked]', '[data-bft-filtered]']);
+});
