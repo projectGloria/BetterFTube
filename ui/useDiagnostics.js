@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
+import { onSettingsChanged } from '../lib/settings.js';
 
 // Asks the active tab's content script how many elements each toggle's selectors
 // match right now. This is the "is my selector still alive?" tool: if YouTube
@@ -8,7 +9,7 @@ import { browser } from 'wxt/browser';
 //
 // Returns null when the active tab isn't YouTube (sendMessage rejects: no
 // receiver), which is the expected case, not an error.
-export function useDiagnostics(selectors = false, settings = null) {
+export function useDiagnostics(selectors = false) {
   const [diag, setDiag] = useState(null);
 
   useEffect(() => {
@@ -31,12 +32,17 @@ export function useDiagnostics(selectors = false, settings = null) {
     refresh();
     // Expensive selector counts are opt-in. The normal popup gets one cheap
     // status refresh per settings change, with no background polling.
+    // Subscribed to the change EVENT here, instead of listing the settings
+    // object as an effect dependency: that tore down and rebuilt the effect
+    // (and the 3s interval) on every toggle just to trigger a refresh.
+    const off = onSettingsChanged(refresh);
     const timer = selectors ? setInterval(refresh, 3000) : null;
     return () => {
       alive = false;
+      off();
       clearInterval(timer);
     };
-  }, [selectors, settings]);
+  }, [selectors]);
 
   return diag;
 }

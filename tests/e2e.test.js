@@ -327,11 +327,13 @@ test('watch actions: bell, reactions, Save and three-dot menu hidden; Share copi
   assert.equal(await page.evaluate(() => window.__shareOpened), false);
   await setToggle('Hide Share button', true);
   assert.equal(await page.locator('#share-button').isVisible(), false);
+  await setToggle('Ctrl+C copies video link', true); // its own toggle now, no longer implied by hiding Share
   await page.keyboard.press('Control+c');
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), 'https://youtu.be/AAAAAAAAAAA');
   await page.locator('#bft-link-copied').waitFor();
   assert.equal(await page.locator('#bft-link-copied').textContent(), '✓Link Copied!');
   await setToggle('Hide Share button', false);
+  await setToggle('Ctrl+C copies video link', false);
   await setToggle('Hide description', true);
   assert.equal(await page.locator('#description').isVisible(), false);
   await setToggle('Hide description', false);
@@ -531,7 +533,7 @@ test('default speed via player API; per-channel memory only from user input', as
   await page.keyboard.press('Shift+Period');
   await page.evaluate(() => (document.querySelector('video').playbackRate = 2));
   await settle(300);
-  assert.deepEqual(await readStorage('bft:speeds'), { '@speedchan': 2 });
+  assert.deepEqual(await readStorage('bft:speeds'), { UCspeedchan: 2 }); // player channel_id, never the owner-row handle
 
   // Same channel again → channel speed wins over default
   await page.reload();

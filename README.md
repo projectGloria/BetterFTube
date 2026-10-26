@@ -123,7 +123,7 @@ Switch instant presets depending on your current mode:
 |---|---|
 | **Feed** | Hide Shorts (shelves, search, sidebar, channel tab) • Open Shorts in normal player • Redirect Home → Subscriptions • Hide category chips • Disable video hover effects (card highlight, thumbnail buttons, zoom and preview) • Keyword/channel blocklist • Hide watched (≥90%) • Hide Mixes • Hide Live streams • Hide Upcoming • Hide Community posts • Hide Playables • Hide Promos &amp; Banners |
 | **Filters** | Hide shorter than *N* min • Hide longer than *N* min • Hide fewer than *N* views • Hide older than *N* days • **Allowlist mode** (only show channels you list) |
-| **Watch Page** | Hide Comments • Hide Related videos • Limit right-panel suggestions count • Hide End-screen cards • Hide Info cards &amp; watermark • Hide Merch/products/donations • Hide Hashtags above title • Hide Live chat • Align title &amp; channel • Quick copy `youtu.be` link on Share button • Hide Share button (with `Ctrl+C` fallback) |
+| **Watch Page** | Hide Comments • Hide Related videos • Limit right-panel suggestions count • Hide End-screen cards • Hide Info cards &amp; watermark • Hide Merch/products/donations • Hide Hashtags above title • Hide Live chat • Align title &amp; channel • Quick copy `youtu.be` link on Share button • Hide Share button • `Ctrl+C` copies the video link (separate toggle) |
 | **Player** | Disable autoplay-next • Theater mode by default • Default playback quality • Hide "Premium-only" 1080p qualities • Default speed • **Remember speed per channel** (e.g., 2× for lectures, 1× for music) |
 | **You sidebar** | Separate toggles for You heading, Your channel, History, Playlists, Watch later, Liked videos, Your videos, Downloads, Clips and Show less |
 | **Navigation** | Hide Subscriptions section • Hide Explore section • Hide "More from YouTube" • Hide Sidebar footer links • Hide Notifications bell • Hide Create button • Hide Voice search |
@@ -180,7 +180,7 @@ BetterFTube is built using modern Manifest V3 standards and runs on all major mo
 | <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd> | **Master Toggle** | Turn all BetterFTube toggles on/off instantly without reloading. |
 | <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> | **Cycle Presets** | Step through Default, Focus, and your saved Custom presets. |
 | <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | **Element Picker** | Launch the on-screen picker to target and hide any YouTube element. |
-| <kbd>Ctrl</kbd> + <kbd>C</kbd> | **Quick Copy Link** | When hovering or focusing the Share button, copies a clean `youtu.be` link. |
+| <kbd>Ctrl</kbd> + <kbd>C</kbd> | **Quick Copy Link** | With *Ctrl+C copies video link* on: on a watch page, when no text is selected and no field is focused, copies a clean `youtu.be` link. |
 
 *Shortcuts can be customized anytime via `chrome://extensions/shortcuts` or `about:addons`.*
 

@@ -8,7 +8,7 @@ import {
   startBehaviors,
   toast,
 } from '../lib/behaviors.js';
-import { FEATURES, ON_ATTR, attrFor, attrValue, buildCustomStylesheet, buildStylesheet } from '../lib/features.js';
+import { FEATURES, ON_ATTR, REVEAL_ATTR, attrFor, attrValue, buildCustomStylesheet, buildStylesheet } from '../lib/features.js';
 import { startOnline, onlineStatus } from '../lib/online.js';
 import { startPicker } from '../lib/picker.js';
 import { isSafeSelector, loadSettings, newId, onSettingsChanged, updateSettings } from '../lib/settings.js';
@@ -116,8 +116,6 @@ export default defineContentScript({
         custom: { ...s.custom, rules: s.custom.rules.filter(r => r.id !== id) } })));
     };
     let revealTimer;
-    const revealStyle = document.createElement('style');
-    (document.head ?? root).append(revealStyle);
 
     // Messages from popup (diagnostics, picker) and background (context menu,
     // shortcuts). sendResponse + `return true` instead of returning a Promise:
@@ -129,9 +127,11 @@ export default defineContentScript({
           return false;
         case 'bft:reveal':
           clearTimeout(revealTimer);
-          revealStyle.textContent = 'html[data-bft-on] [data-bft-blocked], html[data-bft-on] [data-bft-filtered] { display: revert !important; outline: 2px solid orange !important; }';
+          // One attribute flip: the hide rules exclude it (see REVEAL_ATTR), and
+          // setAttrs() only touches MANAGED attrs, so a settings apply can't end it early.
+          root.setAttribute(REVEAL_ATTR, '');
           toast('Revealed blocked and filtered tiles for 15 seconds. Orange outlines mark them.');
-          revealTimer = setTimeout(() => { revealStyle.textContent = ''; }, 15000);
+          revealTimer = setTimeout(() => root.removeAttribute(REVEAL_ATTR), 15000);
           sendResponse({ ok: true });
           return false;
         case 'bft:diagnose':

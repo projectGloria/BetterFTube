@@ -1,14 +1,6 @@
 import { useState } from 'react';
-import { isSafeSelector, newId } from '../../lib/settings.js';
-
-// CSS.supports('selector(…)') asks the CSS parser itself, i.e. exactly what
-// the injected stylesheet will accept, without touching the DOM.
-export function selectorError(sel) {
-  if (!sel.trim()) return 'Empty selector';
-  if (!isSafeSelector(sel)) return 'Selectors can’t contain { } ; or comments';
-  if (!CSS.supports(`selector(${sel})`)) return 'Browser can’t parse this selector';
-  return null;
-}
+import { newId } from '../../lib/settings.js';
+import { selectorError } from '../../lib/validation.js';
 
 export function RulesEditor({ rules, onChange }) {
   const [label, setLabel] = useState('');

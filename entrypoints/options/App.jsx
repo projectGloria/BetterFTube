@@ -10,6 +10,8 @@ import { RulesEditor } from './RulesEditor.jsx';
 
 const VERSION = browser.runtime.getManifest().version;
 const identity = (v) => v;
+const channelUrl = (key) =>
+  `https://www.youtube.com/${key.startsWith('@') ? encodeURIComponent(key).replace('%40', '@') : `channel/${encodeURIComponent(key)}`}`;
 
 // Speeds live under their own storage key (see lib/speeds.js), so they get a
 // small subscription of their own instead of riding on useSettings.
@@ -182,13 +184,16 @@ export default function App() {
           <h2>Remembered speeds</h2>
           <span className="muted">{speedEntries.length} channels</span>
         </header>
-        <p className="muted">Recorded when "Remember speed per channel" is on and you change speed on a video.</p>
+        <p className="muted">Recorded when "Remember speed per channel" is on and you change speed on a video. Entries starting with @ come from older versions and no longer apply; forget them and set the speed again.</p>
         {speedEntries.length > 0 ? (
           <ul className="rules">
             {speedEntries.map(([channel, rate]) => (
               <li key={channel} className="rule">
                 <span className="rule__text">
-                  {channel} <b>{rate}×</b>
+                  {/* Keys are player channel ids (UC…), unreadable on their own;
+                      linking them is the cheap way to see which channel it is.
+                      Older versions also stored @handles, which link the same way. */}
+                  <a href={channelUrl(channel)} target="_blank" rel="noreferrer">{channel}</a> <b>{rate}×</b>
                 </span>
                 <button type="button" className="btn btn--small" onClick={() => saveSpeed(channel, null).catch(err => setStatus({ ok: false, text: err.message }))}>
                   Forget

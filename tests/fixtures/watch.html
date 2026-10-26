@@ -58,7 +58,7 @@
   };
   video.src = wav(10);
   p.getAvailableQualityLevels = () => ['hd1080', 'hd720', 'large', 'auto'];
-  p.getVideoData = () => ({ video_id: 'AAAAAAAAAAA' });
+  p.getVideoData = () => ({ video_id: 'AAAAAAAAAAA', channel_id: 'UCspeedchan' });
   p.setPlaybackQualityRange = (a) => __calls.push(a);
   document.querySelector('.ytp-button').onclick = function () {
     const t = this.firstElementChild;

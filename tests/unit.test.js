@@ -29,13 +29,19 @@ test('feature list is internally consistent', () => {
 
 test('stylesheet: one gated rule per selector', () => {
   const css = buildStylesheet();
-  const expected = FEATURES.reduce((n, f) => n + (f.hide?.length ?? 0), 0) + 15 + HOVER_RULES.length; // filter, suggestion, share, alignment, scrollbar, and hover rules
+  const expected = FEATURES.reduce((n, f) => n + (f.hide?.length ?? 0), 0) + 16 + HOVER_RULES.length; // filter, reveal, suggestion, share, alignment, scrollbar, and hover rules
   const rules = css.split('\n');
   assert.equal(rules.length, expected);
-  for (const r of rules) assert.match(r, /^html\[data-bft-[a-z0-9-]+(?:="(?:center|right)")?\](?:\[data-bft-no-scroll\])?(?: .+)? \{ .+ !important; \}$/);
+  for (const r of rules) assert.match(r, /^html\[data-bft-[a-z0-9-]+(?:="(?:center|right)")?\](?:\[data-bft-(?:no-scroll|reveal|watch)\]|:not\(\[data-bft-reveal\]\))*(?: .+)? \{ .+ !important; \}$/);
   assert.match(css, /grid-template-columns: minmax\(0,1fr\) auto minmax\(0,1fr\)/);
   assert.match(css, /align-items: center !important; margin-top: 12px !important;/);
-  assert.match(css, /html\[data-bft-on\] \{ overflow-y: auto !important; scrollbar-gutter: auto !important; \}/);
+  // Scroll overrides are scoped to watch pages: elsewhere they would defeat
+  // YouTube's scroll locks for dialogs and the guide drawer.
+  assert.match(css, /html\[data-bft-on\]\[data-bft-watch\] \{ overflow-y: auto !important; scrollbar-gutter: auto !important; \}/);
+  assert.doesNotMatch(css, /html\[data-bft-on\] (?:body )?\{ overflow-y/);
+  // Reveal lifts blocklist/filter hiding through the gate, never via `display: revert`.
+  assert.match(css, /html\[data-bft-blocklist\]:not\(\[data-bft-reveal\]\) \[data-bft-blocked\] \{ display: none !important; \}/);
+  assert.doesNotMatch(css, /revert/);
 });
 
 test('custom stylesheet: rules gated as a whole via :is(), css only when enabled', () => {

@@ -93,7 +93,16 @@ Run `npm test` for logic and DOM regression coverage, then build and run the Chr
 - Concurrently change separate settings and add separate channels from two contexts: both changes persist. Simulate a storage error: drafts remain and an error is shown.
 - Ctrl/Meta/Shift-click Home: normal browser new-tab/window behavior is preserved.
 - Search and Enabled only filter the popup; turn Selector diagnostics on to see match counts.
-- Block a channel and use Undo. Reveal blocked/filtered tiles: orange outlines appear for 15 seconds, then hiding resumes.
+- Block a channel and use Undo. Reveal blocked/filtered tiles: orange outlines appear for 15 seconds and the grid keeps its layout (no tiles collapsing inline), then hiding resumes.
+- Allowlist mode on a channel's Videos tab and in playlists: tiles stay visible (no channel row means no channel info, not "12K views"). Right-click Block on such a tile reports no channel.
+- Speed memory on a hard-loaded watch page: the remembered entry in Options is a `UC…` channel id (linked), never an `@handle`, and the speed doesn't flicker on load.
+- With the extension on, open the Share dialog, Save-to-playlist dialog and (narrow window) the guide drawer on Home and Watch: the page behind must not scroll.
+- Toggle the master switch off and on mid-video after re-enabling autoplay: autoplay stays on until the next video.
+- Hide Share button alone leaves Ctrl+C native; *Ctrl+C copies video link* enables the shortcut.
+- Limit suggestions with a blocklist that hides some sidebar tiles: the visible count still matches the limit.
+- Like/dislike a video with *Show dislike count* on: the count stays on the button.
+- Trigger several toasts quickly (block + undo, SponsorBlock skip): they stack instead of overlapping.
+- Options → rules: `ytd-a, ytd-b` is accepted; a broken selector reports a parse error.
 - Navigate the picker with keyboard only. Saving failure keeps the panel open; Escape restores focus.
 - Export/import speeds, confirm the replacement preview, and reset everything: speeds are included. Canceling import changes nothing; unrelated JSON is rejected.
 - Test unsupported UI languages: view/age limitations are stated and unparseable tiles remain visible.

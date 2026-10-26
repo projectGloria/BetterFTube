@@ -4,11 +4,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { JSDOM } from 'jsdom';
 import { normalize, DEFAULTS } from '../lib/settings.js';
-import { isSafeSelector, validateBackup, LIMITS } from '../lib/validation.js';
+import { isSafeSelector, selectorError, validateBackup, LIMITS } from '../lib/validation.js';
 import { applyChanges, settingsChanges, serialQueue } from '../lib/mutations.js';
-import { buildCustomStylesheet, attrFor, FEATURES, TILES } from '../lib/features.js';
+import { buildCustomStylesheet, buildStylesheet, attrFor, FEATURES, TILES, WATCH_ATTR } from '../lib/features.js';
 import { compileMatcher, invalidRegexLines } from '../lib/blocklist.js';
-import { compileFilters } from '../lib/filters.js';
+import { compileFilters, parseAgeDays, parseViews } from '../lib/filters.js';
 import { parseSegments, fetchDislikes, isVideoId } from '../lib/api.js';
 import { normalizeSpeeds } from '../lib/speeds.js';
 
@@ -18,7 +18,7 @@ function environment(t, html = '') {
   const dom = new JSDOM(`<html><body>${html}</body></html>`, { url: 'https://www.youtube.com/watch?v=AAAAAAAAAAA', runScripts: 'outside-only' });
   t.after(() => dom.window.close());
   const ctx = dom.getInternalVMContext();
-  Object.assign(ctx, { attrFor, TILES, compileMatcher, compileFilters,
+  Object.assign(ctx, { attrFor, TILES, WATCH_ATTR, compileMatcher, compileFilters, parseViews, parseAgeDays,
     loadSpeeds: async () => ({}), onSpeedsChanged: () => {}, saveSpeed: async () => {},
     startWatchControls: () => {}, startSuggestionLimit: () => {}, startWatchScrollbar: () => {},
     interceptShareClick: () => {}, interceptCopyShortcut: () => {} });
@@ -72,6 +72,9 @@ test('watch controls mark actions and Share copies the clean video link', async 
     stopImmediatePropagation() { this.stopped = true; },
   };
   ctx.shortcut = shortcut;
+  run('interceptCopyShortcut(shortcut, () => {})');
+  assert.equal(shortcut.prevented, undefined, 'hiding Share alone no longer hijacks Ctrl+C');
+  run('document.documentElement.setAttribute("data-bft-copy-link-shortcut", "")');
   let notices = 0;
   ctx.copiedNotice = () => notices++;
   run('interceptCopyShortcut(shortcut, () => {}, copiedNotice)');
@@ -316,7 +319,9 @@ test('enabling speed memory mid-video discovers channel; preview and extension r
   run('document.documentElement.setAttribute("data-bft-video-id", "AAAAAAAAAAA")');
   await run('startSpeedMemory()');
   run('document.documentElement.setAttribute("data-bft-remember-speed", "")'); await sleep(0);
-  assert.equal(run('currentChannel'), '@channel');
+  assert.equal(run('currentChannel'), null, 'the owner row alone never becomes a speed key');
+  run('document.documentElement.setAttribute("data-bft-channel-id", "UCchannel")'); await sleep(0);
+  assert.equal(run('currentChannel'), 'UCchannel');
   run('lastInputAt = performance.now(); document.querySelector("#preview").playbackRate = 2; onRateChange({ target: document.querySelector("#preview") })');
   assert.equal(saves.length, 0);
   run('lastInputAt = performance.now(); document.querySelector("#main").playbackRate = 2; onRateChange({ target: document.querySelector("#main") })');
@@ -348,17 +353,22 @@ test('MAIN player bridge clears the recording gesture before changing speed', as
   assert.equal(run('currentChannel'), 'UCsecond');
 });
 
-test('revealed tiles override hiding CSS without changing persisted settings', t => {
-  const { ctx, run } = environment(t, '<div data-bft-blocked>hidden tile</div>');
-  run('document.documentElement.setAttribute("data-bft-on", "")');
+test('reveal lifts blocklist/filter hiding and keeps the tile\'s own display value', t => {
+  const { ctx } = environment(t, '<ytd-rich-item-renderer id="b" data-bft-blocked></ytd-rich-item-renderer><ytd-rich-item-renderer id="f" data-bft-filtered></ytd-rich-item-renderer>');
+  const root = ctx.document.documentElement;
+  root.setAttribute('data-bft-on', ''); root.setAttribute('data-bft-blocklist', '');
   const style = ctx.document.createElement('style');
-  style.textContent = 'html[data-bft-on] [data-bft-blocked] { display:none !important }'; ctx.document.head.append(style);
-  const tile = ctx.document.querySelector('[data-bft-blocked]');
-  assert.equal(ctx.getComputedStyle(tile).display, 'none');
-  const reveal = ctx.document.createElement('style');
-  reveal.textContent = 'html[data-bft-on] [data-bft-blocked] { display:revert !important }'; ctx.document.head.append(reveal);
-  assert.notEqual(ctx.getComputedStyle(tile).display, 'none');
-  reveal.remove(); assert.equal(ctx.getComputedStyle(tile).display, 'none');
+  // YouTube's own author style, plus only our marker rules (jsdom can't parse every :has()).
+  style.textContent = 'ytd-rich-item-renderer { display: block }\n' +
+    buildStylesheet().split('\n').filter(r => /data-bft-(?:blocked|filtered)\]/.test(r)).join('\n');
+  ctx.document.head.append(style);
+  const display = id => ctx.getComputedStyle(ctx.document.getElementById(id)).display;
+  assert.equal(display('b'), 'none'); assert.equal(display('f'), 'none');
+  root.setAttribute('data-bft-reveal', '');
+  // `display: revert` would have produced the UA default (inline) here.
+  assert.equal(display('b'), 'block'); assert.equal(display('f'), 'block');
+  root.removeAttribute('data-bft-reveal');
+  assert.equal(display('b'), 'none');
 });
 
 test('modern camel-case lockup classes supply blocklist and filter fields', t => {
@@ -388,4 +398,101 @@ test('normal popup diagnostics skip all feature and user-rule selector scans', t
   assert.deepEqual(result.counts, {});
   assert.equal(result.hidden.blocklist, 1);
   assert.deepEqual(selectors, ['[data-bft-blocked]', '[data-bft-filtered]']);
+});
+
+test('lockups without a channel link never use the view count as the channel', t => {
+  const { run } = environment(t, `<yt-lockup-view-model id="channel-page">
+    <h3 class="ytLockupMetadataViewModelTitle">Upload</h3>
+    <span class="ytContentMetadataViewModelMetadataText">12K views</span>
+    <span class="ytContentMetadataViewModelMetadataText">2 days ago</span>
+  </yt-lockup-view-model>
+  <yt-lockup-view-model id="linked-name">
+    <span class="ytContentMetadataViewModelMetadataText">Playlist · 3 videos</span>
+    <span class="ytContentMetadataViewModelMetadataText"><a href="/@creator">Creator</a></span>
+  </yt-lockup-view-model>
+  <yt-lockup-view-model id="views-first">
+    <a href="/@creator"></a>
+    <span class="ytContentMetadataViewModelMetadataText">12K views</span>
+  </yt-lockup-view-model>
+  <yt-lockup-view-model id="no-link">
+    <span class="ytContentMetadataViewModelMetadataText">Fine Channel</span>
+    <span class="ytContentMetadataViewModelMetadataText">5K views</span>
+  </yt-lockup-view-model>`);
+  run(source('lib/behaviors.js'));
+  const channel = id => run(`readTile(document.getElementById("${id}")).channel`);
+  assert.equal(channel('channel-page'), '');
+  assert.equal(channel('linked-name'), 'Creator');
+  assert.equal(channel('views-first'), '');
+  assert.equal(channel('no-link'), 'Fine Channel', 'feeds without channel links keep name matching');
+  run('history.pushState({}, "", "/@someone/videos")');
+  assert.equal(channel('no-link'), '', 'channel pages have no channel row, whatever the language');
+  run('history.pushState({}, "", "/watch?v=AAAAAAAAAAA")');
+  assert.equal(run('channelAt(document.getElementById("channel-page"))'), null, 'right-click block finds nothing instead of "12K views"');
+  // Allowlist mode keeps tiles with no channel information.
+  const allow = compileFilters({ allow: ['@someone'] });
+  assert.equal(allow(JSON.parse(run('JSON.stringify(readTile(document.getElementById("channel-page")))'))), false);
+});
+
+test('rule editor accepts selector lists and explains rejections', () => {
+  const { window } = new JSDOM('');
+  assert.equal(selectorError('ytd-a, ytd-b', window.document), null);
+  assert.equal(selectorError('ytd-a:has(> a[href="/x"])', window.document), null);
+  assert.equal(selectorError('a[', window.document), 'Browser can’t parse this selector');
+  assert.equal(selectorError('  ', window.document), 'Empty selector');
+  window.close();
+});
+
+test('list changes keep case-only edits and reorders, merging other tabs\' additions', () => {
+  const base = normalize({ lists: { channels: ['@foo', '@bar'] }, custom: { rules: [{ id: 'a', selector: 'a' }, { id: 'b', selector: 'b' }] } });
+  const edited = structuredClone(base);
+  edited.lists.channels = ['@bar', '@Foo'];
+  edited.custom.rules.reverse();
+  const elsewhere = structuredClone(base); elsewhere.lists.channels.push('@baz');
+  const result = applyChanges(elsewhere, settingsChanges(base, edited));
+  assert.deepEqual(result.lists.channels, ['@bar', '@Foo', '@baz']);
+  assert.deepEqual(result.custom.rules.map(r => r.id), ['b', 'a']);
+  assert.deepEqual(settingsChanges(base, structuredClone(base)), []);
+});
+
+test('suggestion limit does not spend slots on tiles the scanner hid later', (t) => {
+  const { ctx, run } = environment(t, `<div id="related">
+    <ytd-compact-video-renderer id="r1"></ytd-compact-video-renderer>
+    <ytd-compact-video-renderer id="r2"></ytd-compact-video-renderer>
+    <ytd-compact-video-renderer id="r3"></ytd-compact-video-renderer>
+  </div>`);
+  run(source('lib/suggestions.js'));
+  const marked = () => [...ctx.document.querySelectorAll('[data-bft-suggestion-overflow]')].map((el) => el.id);
+  run('limitSuggestions(document.querySelector("#related"), 2, () => true)');
+  assert.deepEqual(marked(), ['r3']);
+  run('document.documentElement.setAttribute("data-bft-blocklist", ""); document.querySelector("#r1").setAttribute("data-bft-blocked", "")');
+  run('limitSuggestions(document.querySelector("#related"), 2, () => true)');
+  assert.deepEqual(marked(), [], 'r3 takes the slot r1 no longer uses');
+});
+
+test('master switch off/on mid-video does not re-force autoplay; a new navigation does', async t => {
+  const { ctx, run } = environment(t, '<button class="ytp-autonav-toggle-button" aria-checked="true"></button>');
+  run(source('lib/behaviors.js'));
+  const button = ctx.document.querySelector('button');
+  let clicks = 0; button.onclick = () => { clicks++; button.setAttribute('aria-checked', 'false'); };
+  run('document.documentElement.setAttribute("data-bft-on", ""); document.documentElement.setAttribute("data-bft-disable-autonav", "")');
+  run('onWatchPage()'); await sleep(0);
+  assert.equal(clicks, 1);
+  assert.equal(ctx.document.documentElement.hasAttribute('data-bft-watch'), true);
+  button.setAttribute('aria-checked', 'true'); // the user turns autoplay back on
+  run('onWatchPage({ masterSwitch: true })'); await sleep(0);
+  assert.equal(clicks, 1);
+  run('onWatchPage()'); await sleep(0);
+  assert.equal(clicks, 2);
+});
+
+test('one settings apply rebuilds the matcher once, and toasts share one stack', async t => {
+  const { ctx, run } = environment(t, '<ytd-rich-item-renderer><a id="video-title">x</a></ytd-rich-item-renderer>');
+  let compiles = 0;
+  ctx.compileMatcher = (...args) => { compiles++; return compileMatcher(...args); };
+  run(source('lib/behaviors.js')); run('onAttrChange(FILTER_IDS, scheduleRebuild)');
+  run('document.documentElement.setAttribute("data-bft-on", ""); document.documentElement.setAttribute("data-bft-blocklist", ""); setLists({ keywords: ["x"], channels: [], allow: [] })');
+  await sleep(0);
+  assert.equal(compiles, 1);
+  run('toast("one"); toast("two", () => {})');
+  assert.equal(ctx.document.querySelectorAll('#bft-toasts > [role=status]').length, 2);
 });
